@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Runing Bear</title>
+    <style>
+        body {
+            background: url(light.jpg) no-repeat;
+            background-size: cover;
+        }
+
+        .bear {
+            position: absolute;
+            top: 80%;
+            width: 200px;
+            height: 100px;
+            background: url(bear.png) no-repeat;
+            animation: run 1s steps(8) infinite, move 3s linear forwards;
+        }
+
+        @keyframes move {
+            0% {
+                left: 0;
+            }
+
+            100% {
+                left: 50%;
+                transform: translate(-50%);
+            }
+        }
+
+        @keyframes run {
+            0% {}
+
+            100% {
+                background-position: -1600px 0;
+            }
+        }
+
+        .blackmountain {
+            position: absolute;
+            top: 100%;
+            transform: translate(0, -100%);
+            width: 200%;
+            height: 569px;
+            /* border: 1px solid blue; */
+            background: url(bg2.png) repeat;
+            animation: bg_move 8s linear 3s infinite backwards;
+            background-size: cover;
+        }
+
+        .whitemountain {
+            position: absolute;
+            top: 100%;
+            transform: translate(0, -100%);
+            width: 200%;
+            height: 336px;
+            /* border: 1px solid blue; */
+            background: url(bg1.png) repeat;
+            animation: bg_move 8s linear 3s infinite backwards;
+            background-size: cover;
+        }
+
+        @keyframes bg_move {
+            0% {}
+
+            100% {
+                background-position-x: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="blackmountain"></div>
+    <div class="whitemountain"></div>
+
+    <div class="bear"></div>
+</body>
+
+</html>
