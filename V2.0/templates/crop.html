@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>证件照裁剪 - 智能证件照处理工具</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link
+            href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.1.3/css/bootstrap.min.css"
+            rel="stylesheet"
+    />
+    <!-- CropperJS CSS -->
+    <link
+            href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css"
+            rel="stylesheet"
+    />
+
+    <style>
+        :root {
+            --brand-color: #4a90e2; /* 统一品牌色，可自行修改 */
+        }
+
+        body {
+            background-color: #f8f9fa;
+            padding-top: 70px; /* 给固定导航栏留空间 */
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        /* 顶部导航栏 */
+        .navbar {
+            background-color: #fff;
+        }
+
+        .navbar-brand {
+            color: var(--brand-color) !important;
+            font-weight: 600;
+        }
+
+        .navbar-nav .nav-link.active {
+            color: var(--brand-color) !important;
+            font-weight: 500;
+        }
+
+        /* 统一按钮样式 */
+        .btn-custom {
+            background-color: var(--brand-color);
+            color: #fff;
+            border: none;
+            border-radius: 30px; /* 圆角按钮 */
+            transition: background-color 0.3s;
+        }
+
+        .btn-custom:hover {
+            background-color: #3f7ec7;
+        }
+
+        /* 卡片样式 */
+        .card {
+            margin: 0 auto;
+            max-width: 900px; /* 略加宽，便于两列展示 */
+            border: none;
+            border-radius: 1rem;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+        }
+
+        .card h2 {
+            font-weight: 700;
+        }
+
+        /* 裁剪区域、预览区域 */
+        .crop-container {
+            min-height: 300px;
+            border: 2px dashed #ccc;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .crop-container img {
+            max-width: 100%;
+            /*display: none;*/
+        }
+
+        .preview {
+            width: 100px;
+            height: 140px;
+            overflow: hidden;
+            margin: auto;
+            border: 1px solid #ddd;
+            border-radius: 0.1rem;
+        }
+
+        }
+    </style>
+</head>
+
+<body>
+<!-- 固定顶部导航栏 -->
+<nav class="navbar navbar-expand-lg navbar-light shadow-sm fixed-top">
+    <div class="container">
+        <a class="navbar-brand" href="/">智能证件照处理工具</a>
+        <button
+                class="navbar-toggler"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#navbarNav"
+                aria-controls="navbarNav"
+                aria-expanded="false"
+                aria-label="切换导航"
+        >
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">首页</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/background">换背景</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="/crop">裁剪</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/watermark">加水印</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- 主体内容 -->
+<div class="container mt-5">
+    <div class="card p-4">
+        <h2 class="text-center mb-4">证件照裁剪</h2>
+        <div class="row">
+            <!-- 左列：上传与图片显示 -->
+            <div class="col-md-6 mb-4 mb-md-0">
+                <div class="mb-3">
+                    <label for="imageInput" class="form-label fw-bold">上传图片</label>
+                    <input
+                            type="file"
+                            id="imageInput"
+                            class="form-control"
+                            accept="image/*"
+                    />
+                </div>
+                <!-- 裁剪区域 -->
+                <div class="crop-container">
+                    <img id="image" alt=""/>
+                </div>
+            </div>
+            <!-- 右列：裁剪设置与预览 -->
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="sizeSelector" class="form-label fw-bold">选择裁剪尺寸</label>
+                    <select id="sizeSelector" class="form-select">
+                        <option value="295x413">一寸 (295×413 px)</option>
+                        <option value="413x626">两寸 (413×626 px)</option>
+                        <option value="510x750">三寸 (510×750 px)</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">预览</label>
+                    <div class="preview" id="preview"></div>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <button id="cropBtn" class="btn btn-custom px-4">裁剪并下载</button>
+                    <button id="resetBtn" class="btn btn-secondary" style="border-radius: 30px;">
+                        重新选择图片
+                    </button>
+                </div>
+                <div class="text-center mt-3">
+                    <a
+                            id="downloadLink"
+                            class="btn btn-success"
+                            style="display:none; border-radius: 30px;"
+                    >下载证件照</a
+                    >
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CropperJS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+<!-- Bootstrap 5 JS -->
+<script src="https://cdn.bootcdn.net/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    let cropper;
+
+    // 选择文件后，展示图片并初始化 Cropper
+    document.getElementById('imageInput').addEventListener('change', function (event) {
+        const file = event.target.files[0];
+        if (file) {
+            const img = document.getElementById('image');
+            img.src = URL.createObjectURL(file);
+            img.style.display = 'block';
+
+            if (cropper) cropper.destroy();
+            cropper = new Cropper(img, {
+                aspectRatio: 295 / 413, // 默认一寸
+                viewMode: 1,
+                preview: '#preview'
+            });
+        }
+    });
+
+    // 切换裁剪尺寸
+    document.getElementById('sizeSelector').addEventListener('change', function () {
+        const [width, height] = this.value.split('x');
+        if (cropper) {
+            cropper.setAspectRatio(width / height);
+        }
+    });
+
+    // 执行裁剪
+    document.getElementById('cropBtn').addEventListener('click', function () {
+        const [width, height] = document
+            .getElementById('sizeSelector')
+            .value.split('x')
+            .map(Number);
+
+        if (cropper) {
+            const canvas = cropper.getCroppedCanvas({
+                width: width,
+                height: height
+            });
+            // 导出 Blob 并生成下载链接
+            canvas.toBlob(blob => {
+                const url = URL.createObjectURL(blob);
+                const downloadLink = document.getElementById('downloadLink');
+                downloadLink.href = url;
+                downloadLink.download = '证件照.png';
+                downloadLink.style.display = 'inline-block';
+            });
+        }
+    });
+
+    // 重置
+    document.getElementById('resetBtn').addEventListener('click', function () {
+        document.getElementById('imageInput').value = '';
+        document.getElementById('image').style.display = 'none';
+        document.getElementById('downloadLink').style.display = 'none';
+        if (cropper) cropper.destroy();
+    });
+</script>
+</body>
+</html>
